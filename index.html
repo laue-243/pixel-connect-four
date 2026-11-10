@@ -2,43 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pixel Connect Four</title>
+<title>Pixel Connect Four — Improved</title>
 <style>
-body { background: #000; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; image-rendering: pixelated; }
-canvas { border: 4px solid #00f; image-rendering: pixelated; background: #00f; }
+body { background: #111; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; image-rendering: pixelated; font-family: monospace; }
+canvas { border: 6px solid #00f; image-rendering: pixelated; box-shadow: 0 0 30px #00f8; }
 </style>
 </head>
 <body>
-<canvas id="game" width="420" height="360"></canvas>
+<canvas id="game" width="480" height="420"></canvas>
 <script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-const rows = 6, cols = 7;
-const cell = 60;
-let board = Array(rows).fill().map(() => Array(cols).fill(null));
-let turn = 'R';
-let winner = null;
+const rows = 6, cols = 7, cell = 60;
+let board, turn, winner;
+
+function init() {
+  board = Array(rows).fill().map(() => Array(cols).fill(null));
+  turn = 'R';
+  winner = null;
+}
 
 function draw() {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0,0,480,420);
+  ctx.fillStyle = turn === 'R' ? '#f44' : '#ff0';
+  ctx.font = 'bold 18px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Turn: ' + (turn === 'R' ? 'RED' : 'YELLOW'), 240, 25);
+
   ctx.fillStyle = '#00f';
-  ctx.fillRect(0,0,420,360);
+  ctx.fillRect(20, 40, 420, 360);
   for (let y=0; y<rows; y++) {
     for (let x=0; x<cols; x++) {
-      const px = x*cell + 10, py = y*cell + 10;
-      ctx.fillStyle = board[y][x] === 'R' ? '#f00' : board[y][x] === 'Y' ? '#ff0' : '#fff';
+      const px = x*cell + 40, py = y*cell + 60;
+      ctx.fillStyle = board[y][x] === 'R' ? '#f44' : board[y][x] === 'Y' ? '#ff0' : '#fff';
       ctx.beginPath();
-      ctx.arc(px+20, py+20, 18, 0, Math.PI*2);
+      ctx.arc(px+20, py+20, 20, 0, Math.PI*2);
       ctx.fill();
     }
   }
+
   if (winner) {
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    ctx.fillRect(0,0,420,360);
-    ctx.fillStyle = '#fff';
-    ctx.font = '30px monospace';
+    ctx.fillRect(0,0,480,420);
+    ctx.fillStyle = winner === 'R' ? '#f44' : winner === 'Y' ? '#ff0' : '#fff';
+    ctx.font = 'bold 32px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(winner === 'draw' ? 'Draw!' : (winner === 'R' ? 'Red' : 'Yellow') + ' wins!', 210, 180);
+    ctx.fillText(winner === 'draw' ? 'DRAW!' : (winner === 'R' ? 'RED' : 'YELLOW') + ' WINS!', 240, 180);
+    ctx.fillStyle = '#fff';
+    ctx.font = '18px monospace';
+    ctx.fillText('Click to restart', 240, 230);
   }
 }
 
@@ -77,11 +91,13 @@ function checkWin(y, x) {
 }
 
 canvas.addEventListener('click', e => {
+  if (winner) { init(); draw(); return; }
   const rect = canvas.getBoundingClientRect();
-  const col = Math.floor((e.clientX - rect.left) / cell);
+  const col = Math.floor((e.clientX - rect.left - 20) / cell);
   if (col >= 0 && col < cols) drop(col);
 });
 
+init();
 draw();
 </script>
 </body>
